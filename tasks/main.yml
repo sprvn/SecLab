@@ -1,0 +1,36 @@
+---
+
+- name: Add Hashicorp repository
+  copy:
+    src: hashicorp.repo
+    dest: /etc/yum.repos.d/hashicorp.repo
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Install Terraform
+  yum:
+    name: terraform
+    state: present
+    update_cache: yes
+
+- name: Create Terraform directory
+  file:
+    path: "/root/{{ item }}"
+    state: directory
+    owner: root
+    group: root
+  with_items:
+    - terraform
+    - terraform/SecLab
+
+- name: Copy SecLab Terraform project
+  synchronize: 
+    src: SecLab
+    dest: /root/terraform
+
+- name: Initialize the SecLab Terraform project (download required providers)
+  shell:
+    cmd: terraform init
+    chdir: /root/terraform/SecLab
+
